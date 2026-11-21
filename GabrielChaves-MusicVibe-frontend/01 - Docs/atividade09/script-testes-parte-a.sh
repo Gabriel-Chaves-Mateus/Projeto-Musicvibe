@@ -1,0 +1,21 @@
+cd /home/claude/be; S=/tmp/claude-0/-home-claude/833ba43f-beac-52e1-b4ea-35b86eb21f7a/scratchpad; A=localhost:3000/api; H="Authorization: Bearer"
+M="mysql -uroot -px musicvibe_db -N -e"
+$M "DELETE FROM songs; UPDATE users SET songs_count=0;" ; rm -f public/uploads/songs/audio/* public/uploads/songs/covers/*
+curl -s -XPOST $A/register -H 'Content-Type: application/json' -d '{"username":"maria","email":"m@t.com","password":"123456","confirmPassword":"123456","fullName":"Maria Souza"}' -o /dev/null -w "register B [%{http_code}]\n"
+tok(){ curl -s -XPOST $A/login -H 'Content-Type: application/json' -d "{\"email\":\"$1\",\"password\":\"123456\"}" | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['token'])"; }
+TA=$(tok g@t.com); TB=$(tok m@t.com); echo $TA > $S/tokenA; echo $TB > $S/tokenB
+python3 -c "
+from PIL import Image
+for i,c in enumerate([(124,58,237),(236,72,153),(14,165,233)]): Image.new('RGB',(300,300),c).save('$S/capa%d.jpg'%i)"
+up(){ curl -s -XPOST $A/songs -H "$H $TA" -F title="$1" -F description="$2" -F "audio=@$S/teste.wav;type=audio/wav" -F "cover=@$S/capa$3.jpg;type=image/jpeg" -o /dev/null -w "upload $1 [%{http_code}]\n"; }
+up "Aurora" "Primeira faixa" 0; sleep 1; up "Noite Neon" "Segunda faixa" 1; sleep 1; up "Maré Alta" "Terceira faixa" 2
+cnt(){ echo "   arquivos: audio=$(ls public/uploads/songs/audio | wc -l) covers=$(ls public/uploads/songs/covers | wc -l)"; }
+I1=$($M "select min(id) from songs"); I3=$($M "select max(id) from songs"); echo "ids: $I1..$I3 ($($M 'select group_concat(id order by id) from songs'))"; cnt
+echo "== 1 my-songs"; curl -s -o /dev/null -w "sem token [%{http_code}]\n" $A/my-songs; curl -s $A/my-songs -H "$H $TA" | python3 -c "import sys,json;d=json.load(sys.stdin)['data'];print('A:',[s['title'] for s in d])"; echo "B: $(curl -s $A/my-songs -H "$H $TB")"
+echo "== 2 edit"; curl -s -o /dev/null -w "sem token [%{http_code}]\n" $A/songs/$I1/edit; curl -s -o /dev/null -w "B [%{http_code}]\n" $A/songs/$I1/edit -H "$H $TB"; curl -s -o /dev/null -w "inexistente [%{http_code}]\n" $A/songs/999/edit -H "$H $TA"; curl -s -o /dev/null -w "A [%{http_code}]\n" $A/songs/$I1/edit -H "$H $TA"
+echo "   $($M 'select concat("plays após edit: ",plays_count) from songs where id='"$I1"'')"
+echo "== 3 PUT só texto"; cnt; curl -s -w " [%{http_code}]\n" -XPUT $A/songs/$I1 -H "$H $TA" -F title="Aurora (editada)" -F description="nova desc" | cut -c1-160; cnt
+echo "== 4 PUT com capa"; cnt; OLD=$($M "select cover from songs where id=$I1"); curl -s -o /dev/null -w "[%{http_code}]\n" -XPUT $A/songs/$I1 -H "$H $TA" -F title="Aurora v2" -F "cover=@$S/capa1.jpg;type=image/jpeg"; NEW=$($M "select cover from songs where id=$I1"); echo "   capa: $OLD -> $NEW"; cnt; echo "   antiga ainda no disco? $(ls public/uploads/songs/covers | grep -c $OLD)"
+echo "== 5 órfãos"; cnt; curl -s -o /dev/null -w "B com capa nova [%{http_code}]\n" -XPUT $A/songs/$I1 -H "$H $TB" -F title="x" -F "cover=@$S/capa2.jpg;type=image/jpeg"; cnt; curl -s -o /dev/null -w "A título vazio + capa [%{http_code}]\n" -XPUT $A/songs/$I1 -H "$H $TA" -F title="" -F "cover=@$S/capa2.jpg;type=image/jpeg"; cnt
+echo "== 6 DELETE"; cnt; echo "   $($M 'select concat("songs_count antes: ",songs_count) from users where id=1')"; curl -s -o /dev/null -w "B [%{http_code}]\n" -XDELETE $A/songs/$I3 -H "$H $TB"; curl -s -o /dev/null -w "A [%{http_code}]\n" -XDELETE $A/songs/$I3 -H "$H $TA"; sleep 1; curl -s -o /dev/null -w "GET item [%{http_code}]\n" $A/songs/$I3; cnt; echo "   $($M 'select concat("songs_count depois: ",songs_count) from users where id=$I1')"; curl -s -o /dev/null -w "repetir DELETE [%{http_code}]\n" -XDELETE $A/songs/$I3 -H "$H $TA"
+echo "== 7 perfil"; curl -s $A/profile/gabriel | python3 -c "import sys,json;d=json.load(sys.stdin)['data'];print('anônimo isOwner',d['isOwner'],[s['title'] for s in d['songs']]);print('campos:',list(d))"; curl -s $A/profile/gabriel -H "$H $TA" | python3 -c "import sys,json;print('dono isOwner',json.load(sys.stdin)['data']['isOwner'])"; curl -s $A/profile/gabriel -H "$H $TB" | python3 -c "import sys,json;print('B isOwner',json.load(sys.stdin)['data']['isOwner'])"; curl -s -w " [%{http_code}]\n" $A/profile/fantasma; curl -s -o /dev/null -w "/profile/me [%{http_code}]\n" $A/profile/me -H "$H $TA"

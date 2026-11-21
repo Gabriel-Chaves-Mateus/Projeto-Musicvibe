@@ -1,0 +1,78 @@
+:root {
+  --musicvibe-primary: #7C3AED;
+}
+
+.btn-musicvibe {
+  background-color: var(--musicvibe-primary);
+  border-color: var(--musicvibe-primary);
+  color: white;
+}
+
+.btn-musicvibe:hover {
+  filter: brightness(0.9);
+  color: white;
+}
+
+.text-musicvibe {
+  color: var(--musicvibe-primary);
+}
+/* Layout geral */
+.app-layout { min-height: 100vh; display: flex; flex-direction: column; }
+.app-body { flex: 1; display: flex; }
+.app-content { flex: 1; min-width: 0; }
+.app-sidebar { width: 220px; flex-shrink: 0; }
+
+/* Links ativos usam a cor de marca já existente (nenhuma cor nova) */
+.nav-pills .nav-link { color: var(--musicvibe-primary); }
+.nav-pills .nav-link.router-link-active {
+  background-color: var(--musicvibe-primary);
+  color: white;
+}
+.navbar .nav-link.router-link-active { color: var(--musicvibe-primary); font-weight: 600; }
+a { color: var(--musicvibe-primary); }
+footer { text-align: center; padding: 1rem; font-size: .875rem; }
+
+/* Upload de música */
+.progress-bar { background-color: var(--musicvibe-primary); transition: width .15s linear; }
+.thumbnail-preview {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: .5rem;
+  border: 1px solid #dee2e6;
+}
+
+.btn-musicvibe:disabled {
+  background-color: var(--musicvibe-primary);
+  border-color: var(--musicvibe-primary);
+  color: white;
+  opacity: .65;
+}
+
+/* Feed e Detalhe */
+.song-card { transition: transform .12s ease, box-shadow .12s ease; }
+.song-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important; }
+.song-cover { aspect-ratio: 1 / 1; object-fit: cover; width: 100%; }
+.detail-cover { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: .5rem; }
+.audio-player { width: 100%; }
+
+/* Menu do avatar */
+.avatar-menu { position: relative; }
+.avatar-button { border: 0; padding: .25rem .5rem; }
+.avatar-dropdown { position: absolute; right: 0; left: auto; top: 100%; margin-top: .25rem; min-width: 12rem; }
+.avatar-dropdown .dropdown-item.router-link-exact-active { color: var(--musicvibe-primary); }
+
+/* Modal genérico */
+.modal-backdrop-custom {
+  position: fixed; inset: 0; z-index: 1050;
+  background: rgba(0, 0, 0, .5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.modal-box { width: 100%; max-width: 460px; }
+
+/* Curtir e comentar */
+.like-button { border: 1px solid #dee2e6; color: #6c757d; }
+.like-button:hover { color: var(--musicvibe-primary); border-color: var(--musicvibe-primary); }
+.like-button.active { color: var(--musicvibe-primary); border-color: var(--musicvibe-primary); }
+.comment-text { white-space: pre-wrap; overflow-wrap: anywhere; }

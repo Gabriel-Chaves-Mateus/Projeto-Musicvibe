@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.vite/
+.env
+GabrielChaves-MusicVibe-backend/public/uploads/songs/*
+GabrielChaves-MusicVibe-backend/public/uploads/profiles/*
